@@ -61,7 +61,7 @@ public class AIAgent3StateMachine : MonoBehaviour
         if (navHit.mask == SplashMask) //if we are on splash mask
         {
             m_Agent.speed = _splashSpeed;
-            Debug.Log("You're in the splash zone!");
+            //Debug.Log("You're in the splash zone!");
         }
         else
         {

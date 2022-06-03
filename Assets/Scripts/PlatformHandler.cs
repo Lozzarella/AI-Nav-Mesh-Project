@@ -28,7 +28,7 @@ public class PlatformHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (transform.position != currentTarget)//if platform is not at current target
+        if (transform.localPosition != currentTarget)//if platform is not at current target
         {
             MovePlatform();
 
@@ -42,11 +42,11 @@ public class PlatformHandler : MonoBehaviour
     void MovePlatform()//how to move platform
     {
         //what direction to travel
-        Vector3 heading = currentTarget - transform.position;
-        transform.position += (heading / heading.magnitude) * speed * Time.deltaTime;
+        Vector3 heading = currentTarget - transform.localPosition;
+        transform.localPosition += (heading / heading.magnitude) * speed * Time.deltaTime;
         if (heading.magnitude < tolerance)
         {
-            transform.position = currentTarget; //snap target back into position
+            transform.localPosition = currentTarget; //snap target back into position
             delayStart = Time.time;
         }
     }

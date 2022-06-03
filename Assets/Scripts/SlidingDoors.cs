@@ -7,8 +7,8 @@ using UnityEngine.AI;
 public class SlidingDoors : MonoBehaviour
 {
     //Field
-    private Vector3 startingPoint;//the starting point of the door
-    private Vector3 openPosition;//the end position of the door
+    [SerializeField] private Vector3 startingPoint;//the starting point of the door
+    [SerializeField] private Vector3 openPosition;//the end position of the door
     [SerializeField] private Vector3 direction = Vector3.down;//the direction the door moves
     [SerializeField] private float distance;//the distance we want to move
     [SerializeField] private float speed = 2f;//how fast the door moves
@@ -30,6 +30,7 @@ public class SlidingDoors : MonoBehaviour
 
             if (value) //value == true
             {
+                nextTimeDoorMoves = Time.time + waitTime;
                 if (running != null) StopCoroutine(running);
                 if (obstacle != null) obstacle.carving = true;
             }
@@ -67,7 +68,7 @@ public class SlidingDoors : MonoBehaviour
         startingPoint = transform.position; //the start position is the position this object starts the game at
         openPosition = transform.position + transform.rotation * (direction.normalized * distance);//from the start point add the distance we want to move and make that our end point
 
-        nextTimeDoorMoves = waitTime;//assign next time door moves to the wait time variable we have stored
+        nextTimeDoorMoves =  Time.time + waitTime;//assign next time door moves to the wait time variable we have stored
     }
     void Update()
     {
@@ -81,7 +82,7 @@ public class SlidingDoors : MonoBehaviour
             return;//get out of here we are done bish
         }
 
-        if (nextTimeDoorMoves >= Time.time)//we reach the time where we should move the door
+        if (nextTimeDoorMoves <= Time.time)//we reach the time where we should move the door
         {
             nextTimeDoorMoves = Time.time + waitTime;//increase time for next door move
 

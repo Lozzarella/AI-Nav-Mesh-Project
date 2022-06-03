@@ -5,42 +5,154 @@ using UnityEngine.AI;
 
 public class AIAgent2StateMachine : MonoBehaviour
 {
-    NavMeshAgent m_Agent;
+    #region Variables
 
-    [SerializeField] List<GameObject> collectables;
+    NavMeshAgent m_Agent;
+    public State currentState;
+
+    //Animation variables
+    [SerializeField] private float _animationStop = 0.01f;
+    [SerializeField] private Animator _anim;
+
+    //Variables for navmesh area modifier
+    [SerializeField] private float _speed = 3f;
+    [SerializeField] private float _runSpeed = 15f;
+
+    //Variables for collectables
+    [SerializeField] List<GameObject> _collectables;
     float distanceToCollectable = 5f;
     float _randomDistanceRadius = 2f;
     GameObject collectableGoal;
 
-    public enum State//two states
+    //count how many times we randomly move
+    int _randomMoveCount = 0;
+
+    #endregion
+
+    public enum State//three states the AI moves between
     {
-        Collecting,
-        RandomMove,
+        RandomMove, //AI agent randomly moves
+        Searching, //AI agent searchs for collectable
+        Collecting, //AI agent collects collectable & unlocks a door
     }
 
-    public State currentState;
-    
     // Start is called before the first frame update
     void Start()
     {
-        m_Agent = GetComponent<NavMeshAgent>();
-        NextState();
-
+        m_Agent = GetComponent<NavMeshAgent>();//get nav mesh agent component
+        _anim = GetComponentInChildren<Animator>();
+        NextState(); //statemachine
+       
     }
 
-    private void NextState()//moves into states
+    // Update is called once per frame
+    private void Update()
     {
-        switch(currentState)
+        ChangeAreaSpeed();//runs the change area speed function for different area modifers
+        UpdateAnimator();
+    }
+
+    void ChangeAreaSpeed()
+    {
+        NavMeshHit navHit; //checks if we are hitting the nav mesh
+        m_Agent.SamplePathPosition(-1, 0.0f, out navHit);
+        int RunMask = 1 << NavMesh.GetAreaFromName("Run");//variable for run
+
+        if (navHit.mask == RunMask) //if we are on run mask
         {
-            case State.Collecting:
-                StartCoroutine(CollectState());
-                break;
-            case State.RandomMove:
-                StartCoroutine(RandomMoveState());
-                break;
+            m_Agent.speed = _runSpeed;
+            Debug.Log("Need for Speed!");
+        }
+        else
+        {
+            m_Agent.speed = _speed;
         }
     }
 
+    private void UpdateAnimator()
+    {
+        if (m_Agent.velocity.magnitude < _animationStop)
+        {
+            _anim.SetBool("isWalking", false);
+        }
+        else
+        {
+            _anim.SetBool("isWalking", true);
+        }
+    }
+    private void NextState()//moves into states
+    {
+        switch (currentState)
+        {
+            case State.RandomMove:
+                StartCoroutine(RandomMoveState());
+                break;
+            case State.Searching:
+                StartCoroutine(SearchingState());
+                break;
+            case State.Collecting:
+                StartCoroutine(CollectState());
+                break;
+
+        }
+    }
+
+    private IEnumerator RandomMoveState()//AI randomly moves 
+    {
+        m_Agent.destination = m_Agent.transform.position;
+
+        _randomMoveCount = 0;
+
+        while (currentState == State.RandomMove)
+        {
+            if (_randomMoveCount >= 10)
+            {//once we have found a random location 5 times
+                currentState = State.Searching;
+                continue;//go back to the "while"
+            }
+            //&& m_Agent.hasPath == true
+            if (m_Agent.remainingDistance < 0.1f
+                && m_Agent.pathStatus == NavMeshPathStatus.PathComplete)
+            {
+                _randomMoveCount++;
+
+                Debug.Log("Set Random Position");
+                Vector3 randomOffset = new Vector3(Random.Range(-_randomDistanceRadius, _randomDistanceRadius),
+                                                   0,
+                                                   Random.Range(-_randomDistanceRadius, _randomDistanceRadius));
+                Vector3 newPosition = m_Agent.transform.position + randomOffset;
+                m_Agent.SetDestination(newPosition);
+            }
+
+            foreach (GameObject collect in _collectables)
+            {
+                if (Vector3.Distance(m_Agent.transform.position, collect.transform.position) < distanceToCollectable)
+                {
+                    collectableGoal = collect;
+                    currentState = State.Collecting;
+                }
+            }
+            yield return null;
+        }
+
+        NextState();
+    }
+
+    private IEnumerator SearchingState()
+    {
+        while (currentState == State.Searching)//while in searching state
+        {
+            if (Vector3.Distance(transform.position, _collectables[0].transform.position) < distanceToCollectable)// if collectables does not equal null
+            {
+                currentState = State.Collecting;//sets current state to collecting
+            }
+
+            m_Agent.SetDestination(_collectables[0].transform.position);//set destination to collectable goal
+            yield return null;
+        }
+
+        NextState();//statemachine coroutine
+    }
     private IEnumerator CollectState()//AI goes into collecting state
     {
         Vector3 AIPosition = transform.position;
@@ -54,7 +166,8 @@ public class AIAgent2StateMachine : MonoBehaviour
             }
             else
             {
-                m_Agent.SetDestination(collectableGoal.transform.position);//set destination to collectable goal
+                CollectObect(collectableGoal);
+
             }
             yield return null;
         }
@@ -62,36 +175,31 @@ public class AIAgent2StateMachine : MonoBehaviour
         NextState();//AI moves to next state
     }
 
-    private IEnumerator RandomMoveState()//AI randomly moves 
+
+    void CollectObect(GameObject obect)
     {
-        m_Agent.destination = m_Agent.transform.position;
+        DoorKey key = obect.GetComponent<DoorKey>();
 
-        while (currentState == State.RandomMove)
+        if (key != null)
         {
-            //&& m_Agent.hasPath == true
-            if (m_Agent.remainingDistance < 0.1f
-                && m_Agent.pathStatus == NavMeshPathStatus.PathComplete)
-            {
-                Debug.Log("Set Random Position");
-                Vector3 randomOffset = new Vector3(Random.Range(-_randomDistanceRadius, _randomDistanceRadius),
-                                                   0,
-                                                   Random.Range(-_randomDistanceRadius, _randomDistanceRadius));
-                Vector3 newPosition = m_Agent.transform.position + randomOffset;
-                m_Agent.SetDestination(newPosition);
-            }
-
-            foreach (GameObject collect in collectables)
-            {
-                if (Vector3.Distance(m_Agent.transform.position, collect.transform.position) < distanceToCollectable)
-                {
-                    collectableGoal = collect;
-                    currentState = State.Collecting;
-                }
-            }
-            yield return null;
+            key.UnlockDoor();
         }
 
-        NextState();
+
+        m_Agent.SetDestination(obect.transform.position);//set destination to collectable goal
+        _collectables.Remove(obect);//remove from collection
+        Destroy(obect);//destroys the game object collected by AI
+
+        /*     if (_doorToUnlock == null) return;
+             if (other.transform.tag == "AIAgent")
+             {
+                 _doorToUnlock.IsLocked = false;
+             }*/
+
+
     }
-    
+
 }
+
+
+
