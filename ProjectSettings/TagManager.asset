@@ -3,17 +3,19 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - AIAgent
+  - Barrel
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Splash
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Walls
+  - Barrier
+  - Camera
   - 
   - 
   - 
