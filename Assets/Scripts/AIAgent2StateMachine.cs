@@ -29,6 +29,7 @@ public class AIAgent2StateMachine : MonoBehaviour
 
     #endregion
 
+
     public enum State//three states the AI moves between
     {
         RandomMove, //AI agent randomly moves
@@ -80,7 +81,7 @@ public class AIAgent2StateMachine : MonoBehaviour
             _anim.SetBool("isWalking", true);
         }
     }
-    private void NextState()//moves into states
+    private void NextState()//Starts Coroutine
     {
         switch (currentState)
         {
@@ -175,14 +176,13 @@ public class AIAgent2StateMachine : MonoBehaviour
         NextState();//AI moves to next state
     }
 
-
     void CollectObect(GameObject obect)
     {
         DoorKey key = obect.GetComponent<DoorKey>();
 
-        if (key != null)
+        if (key != null) //if key does not equal null aka we have the key
         {
-            key.UnlockDoor();
+            key.UnlockDoor();//unlock the door
         }
 
 

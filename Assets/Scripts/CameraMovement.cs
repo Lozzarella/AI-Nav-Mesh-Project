@@ -21,11 +21,8 @@ public class CameraMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-   
-
         //assign a component to our reference
         charC = GetComponent<CharacterController>();
-
     }
 
     // Update is called once per frame
@@ -40,7 +37,6 @@ public class CameraMovement : MonoBehaviour
             moveDir = transform.TransformDirection(moveDir);//allows us to move where player is facing
             //moveDir is multiplied by speed so we move at a decent pace
             moveDir *= moveSpeed;
-        
         }
 
         //regardless of if we are grounded or not the players moveDir.y is always affected by gravity multiplied my time.deltaTime to normalize it

@@ -6,6 +6,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshObstacle))]
 public class SlidingDoors : MonoBehaviour
 {
+    #region Variables
     //Field
     [SerializeField] private Vector3 startingPoint;//the starting point of the door
     [SerializeField] private Vector3 openPosition;//the end position of the door
@@ -20,7 +21,7 @@ public class SlidingDoors : MonoBehaviour
     [SerializeField] private bool _isLocked = false;//check to see if the door is able to move
 
     NavMeshObstacle obstacle;
-
+    #endregion
 
     public bool IsLocked//property
     {
