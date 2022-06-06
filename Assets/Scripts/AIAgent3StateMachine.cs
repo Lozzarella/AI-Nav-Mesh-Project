@@ -15,7 +15,7 @@ public class AIAgent3StateMachine : MonoBehaviour
     [SerializeField] private Animator _anim;
 
     //Collectable variables
-    [SerializeField] List <GameObject> _collectables;
+    [SerializeField] List<GameObject> _collectables;
     [SerializeField] float _distanceToCollectable = 5f;
     GameObject _collectableGoal;
     public State currentState;
@@ -92,7 +92,7 @@ public class AIAgent3StateMachine : MonoBehaviour
 
     private IEnumerator SearchingState()//Function for searching state
     {
-        Debug.Log("Currently Searching"); //logs when AI enters searching state
+        //Debug.Log("Currently Searching"); //logs when AI enters searching state
         while (currentState == State.Searching)//while in searching state
         {
             if (_collectables[0] != null)// if collectables does not equal null
@@ -103,22 +103,22 @@ public class AIAgent3StateMachine : MonoBehaviour
             m_Agent.SetDestination(_collectables[0].transform.position);//set destination to collectable goal
             yield return null;
         }
-        Debug.Log("Stopped Searching");
+        //Debug.Log("Stopped Searching");
         NextState();
     }
 
     private IEnumerator CollectingState() //Function for collecting state
     {
-        Debug.Log("Currently Collecting"); //logs when AI enters collecting state
+        //Debug.Log("Currently Collecting"); //logs when AI enters collecting state
         while (currentState == State.Collecting)//while AI is in collecting state
         {
             if (_collectables == null) //if collectables is null and the Ai has not collected collectables
             {
                 currentState = State.Searching; //set current state to searching
             }
-            if (Vector3.Distance(m_Agent.transform.position, _collectables[0].transform.position) < _distanceToCollectable)// if the position of the AI agent and target goal is less than distance to collectable
+            else if (Vector3.Distance(m_Agent.transform.position, _collectables[0].transform.position) < _distanceToCollectable)// if the position of the AI agent and target goal is less than distance to collectable
             {
-                currentState = State.Searching;
+                //currentState = State.Searching;
                 GameObject collectDelete = _collectables[0];//store reference to collectables
                 _collectables.RemoveAt(0);//remove from collection
                 Destroy(collectDelete);//destroys the game object collected by AI
@@ -137,7 +137,7 @@ public class AIAgent3StateMachine : MonoBehaviour
             //}
             yield return null;
         }
-        Debug.Log("Stopped Collecting");
+       // Debug.Log("Stopped Collecting");
         NextState();
     }
 }
